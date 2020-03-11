@@ -16,6 +16,16 @@ def remove_stop_words(word):
 	return not word in STOP_WORDS
 
 
+def create_inv_index(doc):
+	index = {}
+	for word in doc:
+		index[word] = []
+
+	for i,word in enumerate(doc, 1):
+		index[word].append(i)
+
+	return index
+
 def main():
 	doc_file = load_file_data("docs.txt")
 	query_file = load_file_data("queries1.txt")
@@ -25,6 +35,7 @@ def main():
 
 	print(docs)
 	print(queries)
+	print(list(map(create_inv_index,docs)))
 
 
 if __name__ == "__main__":
