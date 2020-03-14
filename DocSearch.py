@@ -8,34 +8,55 @@ def load_file_data(file):
 		return [x.strip('\n') for x in fh.readlines()]
 
 
-def get_words_array(string):
+def get_words(string):
 	return string.split(" ")
 
 
-def remove_stop_words(word):
-	return not word in STOP_WORDS
+class Corpus:
 
+	def __init__(self, raw):
+		self.raw_data = raw
 
-def create_inv_index(doc):
-	index = {}
-	for word in doc:
-		index[word] = []
+		self.documents = {}
+		self.document_words = {}
 
-	for i,word in enumerate(doc, 1):
-		index[word].append(i)
+		self.inverted_index = {}
+		self.corpus_words = []
 
-	return index
+		self.parse_documents()
+
+	def parse_documents(self):
+		for i, doc in enumerate(self.raw_data, 1):
+			self.document_words[i] = list(filter(lambda word: not word in STOP_WORDS, get_words(doc)))
+
+	def build_dictionary(self):
+		all_words = sum(list(self.document_words.values()), [])
+		self.corpus_words = list(set(all_words))
+		print("Words in dictionary: %i" % len(self.corpus_words))
+
+	def create_inverted_index(self):
+		for word in self.corpus_words:
+			self.inverted_index[word] = []
+
+		for i, word in enumerate(self.document_words, 1):
+			print(i)
+			print(word)
+			#self.inverted_index[word].append(i)
+
 
 def main():
-	doc_file = load_file_data("docs.txt")
-	query_file = load_file_data("queries1.txt")
+	corpus_data = load_file_data("docs.txt")
+	query_data = load_file_data("queries1.txt")
 
-	docs = list(map(lambda x: list(filter(remove_stop_words, x)),list(map(get_words_array, doc_file))))
-	queries = list(map(get_words_array, query_file))
+	main_corpus = Corpus(corpus_data)
+	main_corpus.build_dictionary()
+	main_corpus.create_inverted_index()
+	print(main_corpus.inverted_index)
 
-	print(docs)
-	print(queries)
-	print(list(map(create_inv_index,docs)))
+	queries = list(map(get_words, query_data))
+
+	for query in queries:
+		print(query)
 
 
 if __name__ == "__main__":
