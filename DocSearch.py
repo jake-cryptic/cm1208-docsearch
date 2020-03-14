@@ -38,10 +38,9 @@ class Corpus:
 		for word in self.corpus_words:
 			self.inverted_index[word] = []
 
-		for i, word in enumerate(self.document_words, 1):
-			print(i)
-			print(word)
-			#self.inverted_index[word].append(i)
+			for doc in self.document_words:
+				if word in self.document_words[doc]:
+					self.inverted_index[word].append(doc)
 
 
 def main():
@@ -51,12 +50,18 @@ def main():
 	main_corpus = Corpus(corpus_data)
 	main_corpus.build_dictionary()
 	main_corpus.create_inverted_index()
-	print(main_corpus.inverted_index)
 
-	queries = list(map(get_words, query_data))
+	print(dict(sorted(main_corpus.inverted_index.items())))
 
-	for query in queries:
-		print(query)
+	for query in query_data:
+		print("Query:", query)
+		relevant_docs = []
+
+		for word in get_words(query):
+			if word in main_corpus.inverted_index:
+				relevant_docs.append(main_corpus.inverted_index[word])
+
+		print(relevant_docs)
 
 
 if __name__ == "__main__":
