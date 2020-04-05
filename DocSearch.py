@@ -1,3 +1,9 @@
+"""
+"	CM1208 - Maths for Computer Science
+"	Jake Mcneill
+"	c1931370
+"""
+
 import numpy as np
 
 STOP_WORDS = ["the", "or", "it", "and", "but", "which", "on", "so", "that", "if"]
@@ -10,6 +16,10 @@ def load_file_data(file):
 
 def get_words(string):
 	return string.split(" ")
+
+
+def get_relevant(doc_sets):
+	return set.intersection(*list(map(set, doc_sets)))
 
 
 class Corpus:
@@ -51,8 +61,6 @@ def main():
 	main_corpus.build_dictionary()
 	main_corpus.create_inverted_index()
 
-	print(dict(sorted(main_corpus.inverted_index.items())))
-
 	for query in query_data:
 		print("Query:", query)
 		relevant_docs = []
@@ -61,7 +69,9 @@ def main():
 			if word in main_corpus.inverted_index:
 				relevant_docs.append(main_corpus.inverted_index[word])
 
-		print(relevant_docs)
+		relevant = get_relevant(relevant_docs)
+
+		print("Relevant documents:", " ".join(str(d) for d in relevant))
 
 
 if __name__ == "__main__":
