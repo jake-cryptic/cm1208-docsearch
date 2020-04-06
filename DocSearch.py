@@ -125,7 +125,7 @@ def main():
 		# Print angles and document IDs
 		for data in calculated_angles:
 			angle_rounded = round(data[1], 2)
-			print("%s %s" % (data[0], angle_rounded))
+			print("{:} {:.2f}".format(data[0], angle_rounded))
 
 
 
