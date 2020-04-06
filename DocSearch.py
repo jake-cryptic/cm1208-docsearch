@@ -40,7 +40,6 @@ class Corpus:
 		all_words = sum(list(self.document_words.values()), [])
 		self.corpus_words = list(set(all_words))
 		self.corpus_word_count = len(self.corpus_words)
-		print("Words in dictionary: %i" % self.corpus_word_count)
 
 	def create_inverted_index(self):
 		for word in self.corpus_words:
@@ -70,6 +69,21 @@ class Corpus:
 		doc_vector = np.zeros(self.corpus_word_count, dtype=np.int)
 		query_vector = np.zeros(self.corpus_word_count, dtype=np.int)
 
+		for i, word in enumerate(self.corpus_words):
+			doc_vector[i] = doc_words.count(word)
+			query_vector[i] = query_words.count(word)
+
+		print(doc_vector)
+		print(query_vector)
+
+		size = np.linalg.norm(doc_vector) * np.linalg.norm(query_vector)
+
+		return np.degrees(
+			np.arccos(
+				np.dot(doc_vector, query_vector) / size
+			)
+		)
+
 
 def main():
 	corpus_data = load_file_data("docs.txt")
@@ -78,6 +92,9 @@ def main():
 	main_corpus = Corpus(corpus_data)
 	main_corpus.build_dictionary()
 	main_corpus.create_inverted_index()
+
+	# Output requirement
+	print("Words in dictionary: %i" % main_corpus.corpus_word_count)
 
 	for query in query_data:
 		# Output requirement
@@ -88,10 +105,13 @@ def main():
 		# Output requirement
 		print("Relevant documents:", " ".join(str(d) for d in relevant))
 
+		# Calculate angles
 		angles = []
 		for i, doc in enumerate(main_corpus.raw_data):
 			if i not in relevant: continue
 			angles.append([i, main_corpus.calc_angle(doc, query)])
+
+		print(angles)
 
 
 if __name__ == "__main__":
