@@ -30,11 +30,13 @@ class Corpus:
 		self.corpus_words = []
 		self.corpus_word_count = 0
 
+		self.query_doc_cache = {}
+
 		self.parse_documents()
 
 	def parse_documents(self):
 		for i, doc in enumerate(self.raw_data, 1):
-			self.document_words[i] = list(filter(lambda word: not word in STOP_WORDS, get_words(doc)))
+			self.document_words[i] = list(filter(lambda word: word not in STOP_WORDS, get_words(doc)))
 
 	def build_dictionary(self):
 		all_words = sum(list(self.document_words.values()), [])
@@ -58,7 +60,9 @@ class Corpus:
 
 		relevant_docs_set = list(map(set, relevant_docs))
 
-		return set.intersection(*relevant_docs_set)
+		self.query_doc_cache[query] = set.intersection(*relevant_docs_set)
+
+		return self.query_doc_cache[query]
 
 	def calc_angle(self, doc, query):
 		doc_words = get_words(doc)
@@ -82,6 +86,15 @@ class Corpus:
 			)
 		)
 
+	def calculate_angles(self, query):
+		calculated_angles = []
+
+		for i, doc in enumerate(self.raw_data, 1):
+			if i in self.query_doc_cache[query]:
+				calculated_angles.append([i, self.calc_angle(doc, query)])
+
+		return calculated_angles
+
 
 def main():
 	corpus_data = load_file_data("docs.txt")
@@ -104,18 +117,15 @@ def main():
 		print("Relevant documents:", " ".join(str(doc_id) for doc_id in list_of_doc_ids))
 
 		# Calculate angles
-		calculated_angles = []
-		for i, doc in enumerate(main_corpus.raw_data, 1):
-			if i in list_of_doc_ids:
-				calculated_angles.append([i, main_corpus.calc_angle(doc, query)])
+		calculated_angles = main_corpus.calculate_angles(query)
 
-		print(calculated_angles)
+		# Sort angles
 		calculated_angles.sort(key=lambda x: x[1])
-		print(calculated_angles)
 
+		# Print angles and document IDs
 		for data in calculated_angles:
-			angle = round(data[1], 2)
-			print("%s %s" % (data[0], angle))
+			angle_rounded = round(data[1], 2)
+			print("%s %s" % (data[0], angle_rounded))
 
 
 
