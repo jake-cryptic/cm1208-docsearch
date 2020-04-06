@@ -73,11 +73,9 @@ class Corpus:
 			doc_vector[i] = doc_words.count(word)
 			query_vector[i] = query_words.count(word)
 
-		print(doc_vector)
-		print(query_vector)
-
 		size = np.linalg.norm(doc_vector) * np.linalg.norm(query_vector)
 
+		# Angle must be returned in degrees as specified
 		return np.degrees(
 			np.arccos(
 				np.dot(doc_vector, query_vector) / size
@@ -100,18 +98,25 @@ def main():
 		# Output requirement
 		print("Query:", query)
 
-		relevant = main_corpus.get_relevant_docs(query)
+		list_of_doc_ids = main_corpus.get_relevant_docs(query)
 
 		# Output requirement
-		print("Relevant documents:", " ".join(str(d) for d in relevant))
+		print("Relevant documents:", " ".join(str(doc_id) for doc_id in list_of_doc_ids))
 
 		# Calculate angles
-		angles = []
-		for i, doc in enumerate(main_corpus.raw_data):
-			if i not in relevant: continue
-			angles.append([i, main_corpus.calc_angle(doc, query)])
+		calculated_angles = []
+		for i, doc in enumerate(main_corpus.raw_data, 1):
+			if i in list_of_doc_ids:
+				calculated_angles.append([i, main_corpus.calc_angle(doc, query)])
 
-		print(angles)
+		print(calculated_angles)
+		calculated_angles.sort(key=lambda x: x[1])
+		print(calculated_angles)
+
+		for data in calculated_angles:
+			angle = round(data[1], 2)
+			print("%s %s" % (data[0], angle))
+
 
 
 if __name__ == "__main__":
