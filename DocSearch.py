@@ -18,10 +18,6 @@ def get_words(string):
 	return string.split(" ")
 
 
-def get_relevant(doc_sets):
-	return set.intersection(*list(map(set, doc_sets)))
-
-
 class Corpus:
 
 	def __init__(self, raw):
@@ -32,6 +28,7 @@ class Corpus:
 
 		self.inverted_index = {}
 		self.corpus_words = []
+		self.corpus_word_count = 0
 
 		self.parse_documents()
 
@@ -42,7 +39,8 @@ class Corpus:
 	def build_dictionary(self):
 		all_words = sum(list(self.document_words.values()), [])
 		self.corpus_words = list(set(all_words))
-		print("Words in dictionary: %i" % len(self.corpus_words))
+		self.corpus_word_count = len(self.corpus_words)
+		print("Words in dictionary: %i" % self.corpus_word_count)
 
 	def create_inverted_index(self):
 		for word in self.corpus_words:
@@ -51,6 +49,26 @@ class Corpus:
 			for doc in self.document_words:
 				if word in self.document_words[doc]:
 					self.inverted_index[word].append(doc)
+
+	def get_relevant_docs(self, query):
+		relevant_docs = []
+
+		for word in get_words(query):
+			if word in self.inverted_index:
+				relevant_docs.append(self.inverted_index[word])
+
+		relevant_docs_set = list(map(set, relevant_docs))
+
+		return set.intersection(*relevant_docs_set)
+
+	def calc_angle(self, doc, query):
+		doc_words = get_words(doc)
+		query_words = get_words(query)
+
+		# https://docs.scipy.org/doc/numpy/reference/generated/numpy.zeros.html
+		# Change default dtype to int as by default is float64
+		doc_vector = np.zeros(self.corpus_word_count, dtype=np.int)
+		query_vector = np.zeros(self.corpus_word_count, dtype=np.int)
 
 
 def main():
@@ -62,16 +80,18 @@ def main():
 	main_corpus.create_inverted_index()
 
 	for query in query_data:
+		# Output requirement
 		print("Query:", query)
-		relevant_docs = []
 
-		for word in get_words(query):
-			if word in main_corpus.inverted_index:
-				relevant_docs.append(main_corpus.inverted_index[word])
+		relevant = main_corpus.get_relevant_docs(query)
 
-		relevant = get_relevant(relevant_docs)
-
+		# Output requirement
 		print("Relevant documents:", " ".join(str(d) for d in relevant))
+
+		angles = []
+		for i, doc in enumerate(main_corpus.raw_data):
+			if i not in relevant: continue
+			angles.append([i, main_corpus.calc_angle(doc, query)])
 
 
 if __name__ == "__main__":
