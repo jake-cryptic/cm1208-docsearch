@@ -8,8 +8,6 @@ import numpy as np
 from math import acos, degrees
 from time import time
 
-STOP_WORDS = ["the", "or", "it", "and", "but", "which", "on", "so", "that", "if"]
-
 
 t_start = time()
 t_last = time()
@@ -17,7 +15,7 @@ t_last = time()
 
 def timing(label):
 	global t_start, t_last
-	print("Since Start: %ss; Since last func:%ss; Label:%s" % (round(time() - t_start,2), round(time() - t_last,2), label))
+	print("Since Start: %ss; Since last func:%ss; %s" % (round(time() - t_start,2), round(time() - t_last,2), label))
 	t_last = time()
 
 
@@ -27,7 +25,7 @@ def load_file_data(file):
 
 
 def get_words(string):
-	return string.split(" ")
+	return string.split()
 
 
 class Corpus:
@@ -48,7 +46,7 @@ class Corpus:
 
 	def parse_documents(self):
 		for i, doc in enumerate(self.raw_data, 1):
-			self.document_words[i] = list(filter(lambda word: word not in STOP_WORDS, get_words(doc)))
+			self.document_words[i] = get_words(doc)
 
 	def build_dictionary(self):
 		all_words = sum(list(self.document_words.values()), [])
@@ -112,25 +110,26 @@ def main():
 	# Load file data
 	corpus_data = load_file_data("docs.txt")
 	query_data = load_file_data("queries.txt")
-	#timing("Data loaded")
+	timing("Data loaded")
 
-	# Create dictionary and inverted index from Corpus
+	# Create dictionary
 	main_corpus = Corpus(corpus_data)
-	#timing("Corpus class created")
+	timing("Corpus class created")
 	main_corpus.build_dictionary()
-	#timing("Dictionary built")
-	main_corpus.create_inverted_index()
-	#timing("Inverted index created")
+	timing("Dictionary built")
 
 	# Output requirement
-	#print("Words in dictionary: %i" % main_corpus.corpus_word_count)
+	print("Words in dictionary: %i" % main_corpus.corpus_word_count)
+
+	main_corpus.create_inverted_index()
+	timing("Inverted index created")
 
 	for query in query_data:
 		# Output requirement
 		print("Query:", query)
 
 		list_of_doc_ids = main_corpus.get_relevant_docs(query)
-		#timing("Got relevant docs for " + query)
+		timing("Got relevant docs for '%s'" % query)
 
 		# Output requirement
 		print("Relevant documents:", " ".join(str(doc_id) for doc_id in list_of_doc_ids))
