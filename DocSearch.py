@@ -54,11 +54,11 @@ class Corpus:
 		self.corpus_word_count = len(self.corpus_words)
 
 	def create_inverted_index(self):
-		for word in self.corpus_words:
-			self.inverted_index[word] = []
-
-			for doc in self.document_words:
-				if word in self.document_words[doc]:
+		for doc in self.document_words:
+			for word in self.document_words[doc]:
+				if word not in self.inverted_index:
+					self.inverted_index[word] = []
+				if doc not in self.inverted_index[word]:
 					self.inverted_index[word].append(doc)
 
 	def get_relevant_docs(self, query):
