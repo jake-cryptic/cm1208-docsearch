@@ -5,8 +5,19 @@
 """
 
 import numpy as np
+from time import time
 
 STOP_WORDS = ["the", "or", "it", "and", "but", "which", "on", "so", "that", "if"]
+
+
+t_start = time()
+t_last = time()
+
+
+def timing(label):
+	global t_start, t_last
+	print("Since Start: %ss; Since last func:%ss; Label:%s" % (round(time() - t_start,2), round(time() - t_last,2), label))
+	t_last = time()
 
 
 def load_file_data(file):
@@ -97,21 +108,28 @@ class Corpus:
 
 
 def main():
+	# Load file data
 	corpus_data = load_file_data("docs.txt")
-	query_data = load_file_data("queries1.txt")
+	query_data = load_file_data("queries.txt")
+	#timing("Data loaded")
 
+	# Create dictionary and inverted index from Corpus
 	main_corpus = Corpus(corpus_data)
+	#timing("Corpus class created")
 	main_corpus.build_dictionary()
+	#timing("Dictionary built")
 	main_corpus.create_inverted_index()
+	#timing("Inverted index created")
 
 	# Output requirement
-	print("Words in dictionary: %i" % main_corpus.corpus_word_count)
+	#print("Words in dictionary: %i" % main_corpus.corpus_word_count)
 
 	for query in query_data:
 		# Output requirement
 		print("Query:", query)
 
 		list_of_doc_ids = main_corpus.get_relevant_docs(query)
+		#timing("Got relevant docs for " + query)
 
 		# Output requirement
 		print("Relevant documents:", " ".join(str(doc_id) for doc_id in list_of_doc_ids))
@@ -124,9 +142,8 @@ def main():
 
 		# Print angles and document IDs
 		for data in calculated_angles:
-			angle_rounded = round(data[1], 2)
-			print("{:} {:.2f}".format(data[0], angle_rounded))
-
+			angle_rounded = round(data[1], 5)
+			print("{:} {:.5f}".format(data[0], angle_rounded))
 
 
 if __name__ == "__main__":
