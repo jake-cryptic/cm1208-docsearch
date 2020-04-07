@@ -5,6 +5,7 @@
 """
 
 import numpy as np
+from math import acos, degrees
 from time import time
 
 STOP_WORDS = ["the", "or", "it", "and", "but", "which", "on", "so", "that", "if"]
@@ -81,8 +82,8 @@ class Corpus:
 
 		# https://docs.scipy.org/doc/numpy/reference/generated/numpy.zeros.html
 		# Change default dtype to int as by default is float64
-		doc_vector = np.zeros(self.corpus_word_count, dtype=np.int)
-		query_vector = np.zeros(self.corpus_word_count, dtype=np.int)
+		doc_vector = np.zeros(self.corpus_word_count)
+		query_vector = np.zeros(self.corpus_word_count)
 
 		for i, word in enumerate(self.corpus_words):
 			doc_vector[i] = doc_words.count(word)
@@ -91,8 +92,8 @@ class Corpus:
 		size = np.linalg.norm(doc_vector) * np.linalg.norm(query_vector)
 
 		# Angle must be returned in degrees as specified
-		return np.degrees(
-			np.arccos(
+		return degrees(
+			acos(
 				np.dot(doc_vector, query_vector) / size
 			)
 		)
